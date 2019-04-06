@@ -999,7 +999,7 @@ class cwl_writer():
         for condition_pair in combinations(self.conditions.keys(), 2):
             files["DGE"].append(
                 self.root + 
-                f"/Data/{self.identifier}/output//" + 
+                f"/Data/{self.identifier}/output/" + 
                 self.name +
                 f"/{condition_pair[0]}-{condition_pair[1]}_DGE_res.csv")
 
