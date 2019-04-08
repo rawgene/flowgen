@@ -165,7 +165,7 @@ class database_reader():
 class logic_builder():
     def __init__(self, root):
         self.programs_connections = \
-            pd.read_csv(f"{root}/RNASeq/backend_scripts/programs_connections.csv",
+            pd.read_csv(f"{root}/rawg/flowgen/programs_connections.csv",
             index_col=0, dtype=str)
         self.analysis_id = {}
         self.workflow = []
