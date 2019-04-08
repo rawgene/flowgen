@@ -19,6 +19,8 @@ from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from uuid import UUID
 import subprocess
+from zipfile import ZipFile
+import json
 
 if __name__ == "__main__":
     # change current working directory to project root
@@ -42,6 +44,7 @@ if __name__ == "__main__":
     if len(query) > 0:
         s, q = query[0]
         queue_id = q.id
+        session_id = s.id
         identifier = UUID(s.identifier)
         if q.jobtype == "index":
             logpath = f"{root}/Data/{identifier}/indexing.log"
@@ -70,10 +73,22 @@ if __name__ == "__main__":
         Base.prepare(engine, reflect=True)
         Queue = Base.classes.analysis_queue
         session = Session(engine)
+        Workflow = Base.classes.analysis_workflow
         q = session.query(Queue).filter(Queue.id == queue_id).first()
         if proc.returncode == 0:
             q.status = 0
             q.result = "success"
+            workflows = session.query(Workflow).filter(Workflow.session_id == session_id).all()
+            os.chdir(f"Data/{identifier}/output")
+            with ZipFile("../results.zip", "w") as result:
+                for wf in workflows:
+                    paths = json.loads(wf.paths)
+                    for k,v in paths.items():
+                        for path in v:
+                            zip.write(path.split("output/")[-1])
+
+
+
         else:
             q.status = 0
             q.result = "failed"
