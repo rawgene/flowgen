@@ -85,9 +85,7 @@ if __name__ == "__main__":
                     paths = json.loads(wf.paths)
                     for k,v in paths.items():
                         for path in v:
-                            zip.write(path.split("output/")[-1])
-
-
+                            result.write(path.split("output/")[-1])
 
         else:
             q.status = 0
