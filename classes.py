@@ -27,32 +27,66 @@ from sqlalchemy.orm import Session
 import programs
 
 
-class database_checker():
-    def __init__(self, database_link):
-        self.Database = database_link
-        self.Base = automap_base()
-        self.engine = create_engine(self.Database)
-        self.Base.prepare(self.engine, reflect=True)
+# Restructure from class to function
+# Doesn't make sense to define class that only use for once
 
-    def check_and_run(self, root):
-        RSession = self.Base.classes.analysis_session
-        session = Session(self.engine)
-        for entry in session.query(RSession).filter(RSession.status == 1):
-            print(datetime.datetime.now())
-            print(entry.id)
-            self.create_workflow(entry.id, root)
-            entry.status = 2
-        session.commit()
+# class database_checker():
+#     def __init__(self, database_link):
+#         self.Database = database_link
+#         self.Base = automap_base()
+#         self.engine = create_engine(self.Database)
+#         self.Base.prepare(self.engine, reflect=True)
 
-    def create_workflow(self, Session_ID, root):
-        Workflow = self.Base.classes.analysis_workflow
-        reader = database_reader(Session_ID)
-        reader.extract_from_database(self.Database, root)
-        logic = logic_builder(root)
-        logic.create_workflow_logic(reader)
-        print(reader.genome_index)
-        writer = programs.cwl_writer(reader, root)
-        writer.write_workflow(logic, Session(self.engine), Workflow)
+#     def check_and_run(self, root):
+#         RSession = self.Base.classes.analysis_session
+#         session = Session(self.engine)
+#         for entry in session.query(RSession).filter(RSession.status == 1):
+#             print(datetime.datetime.now())
+#             print(entry.id)
+#             self.create_workflow(entry.id, root)
+#             entry.status = 2
+#         session.commit()
+
+#     def create_workflow(self, Session_ID, root):
+#         Workflow = self.Base.classes.analysis_workflow
+#         reader = database_reader(Session_ID)
+#         reader.extract_from_database(self.Database, root)
+#         logic = logic_builder(root)
+#         logic.create_workflow_logic(reader)
+#         print(reader.genome_index)
+#         writer = programs.cwl_writer(reader, root)
+#         writer.write_workflow(logic, Session(self.engine), Workflow)
+
+def database_check_and_run(database_link, root_dir):
+    """
+    Check database for just submitted sessions
+    Status = 1
+    """
+    # Automap database with SQLAlchemy
+    Base = automap_base()
+    engine = create_engine(database_link)
+    Base.prepare(engine, reflect=True)
+    session = Session(engine)
+
+    RSession = Base.classes.analysis_session
+    for entry in session.query(RSession).filter(RSession.status == 1):
+        print(datetime.datetime.now())
+        print(entry.id)
+        create_workflow(entry.id, root_dir)
+        entry.status = 2
+    session.commit()
+
+def create_workflow(self, Session_ID, root):
+    Workflow = self.Base.classes.analysis_workflow
+    reader = database_reader(Session_ID)
+    reader.extract_from_database(self.Database, root)
+    logic = logic_builder(root)
+    logic.create_workflow_logic(reader)
+    print(reader.genome_index)
+    writer = programs.cwl_writer(reader, root)
+    writer.write_workflow(logic, Session(self.engine), Workflow)
+
+
 
 
 class database_reader():
